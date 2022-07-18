@@ -20,9 +20,9 @@ Bn = 12.5e9  # noise bandwidth
 
 class Network(object):
 
-    def __init__(self, json_path, transceiver='fixed_rate'):
+    def __init__(self, json_file, transceiver="fixed_rate"):
         # load the file in a json variable
-        nodes_json = json.load(open(json_path, 'r'))
+        nodes_json = json.load(open(json_file, "r"))
         # empty struct dict
         self.nodes = {}
         self.lines = {}
@@ -33,27 +33,26 @@ class Network(object):
         # json file--> dict, load in dict node's label --> init Node
         for node_label in nodes_json:
             node_dict = nodes_json[node_label]
-            node_dict['label'] = node_label
-
+            node_dict["label"] = node_label
             node = Node(node_dict)
             self.nodes[node_label] = node
-            if 'transceiver' not in nodes_json[node_label].keys():
+            if "transceiver" not in nodes_json[node_label].keys():
                 node.transceiver = transceiver
             else:
-                node.transceiver = nodes_json[node_label]['transceiver']
+                node.transceiver = nodes_json[node_label]["transceiver"]
 
-            for connect_n_label in node_dict['connected_nodes']:
+            for connect_n_label in node_dict["connected_nodes"]:
                 line_dict = {}
                 line_label = node_label + connect_n_label
-                line_dict['label'] = line_label
+                line_dict["label"] = line_label
                 # starting node pos (x, y)
-                node_position = np.array(nodes_json[node_label]['position'])
+                node_position = np.array(nodes_json[node_label]["position"])
 
                 # pos of the other node(x, y)
-                connect_n_pos = np.array(nodes_json[connect_n_label]['position'])
+                connect_n_pos = np.array(nodes_json[connect_n_label]["position"])
 
                 # length=sqrt((x1-x2)^2+(y1-y2)^2)
-                line_dict['length'] = np.sqrt(np.sum(node_position - connect_n_pos) ** 2)
+                line_dict["length"] = np.sqrt(np.sum(node_position - connect_n_pos) ** 2)
 
                 line = Line(line_dict)
                 self.lines[line_label] = line
@@ -85,7 +84,7 @@ class Network(object):
             for path in self.find_paths(couples[0], couples[1]):
                 path_str = ''
                 for node in path:
-                    path_str += node + '-->'
+                    path_str += node + "-->"
                 paths.append(path_str[:-3])
                 s_i = Signal_information(s_power, path)
                 if couples in self.lines.keys():
@@ -98,25 +97,25 @@ class Network(object):
                 noises.append(s_i.getNoisePower())
                 snrs.append(10 * np.log10(s_i.getSignalPower() / s_i.getNoisePower()))
 
-        df['path'] = paths
-        df['latency'] = latencies
-        df['noise'] = noises
-        df['snr'] = snrs
+        df["path"] = paths
+        df["latency"] = latencies
+        df["noise"] = noises
+        df["snr"] = snrs
         self._weighted_paths = df
 
         # set the route space free
         route_space = pd.DataFrame()
-        route_space['path'] = paths
+        route_space["path"] = paths
         for i in range(10):  # every line has 10 channel
-            route_space[str(i)] = ['free'] * len(paths)
+            route_space[str(i)] = ["free"] * len(paths)
         self._route_space = route_space
 
     def draw(self):
         nodes = self.nodes
-        font = {'family': 'serif',
-                'color': 'blue',
-                'weight': 'normal',
-                'size': 15
+        font = {"family": "serif",
+                "color": "blue",
+                "weight": "normal",
+                "size": 15
                 }
         for node_label in nodes:
             n0 = nodes[node_label]
@@ -131,12 +130,12 @@ class Network(object):
                 x1 = n1.position[0] / 1e3
                 y1 = n1.position[1] / 1e3
                 plt.plot([x0, x1], [y0, y1])
-        plt.xlabel('Km')
-        plt.title('Network')
+        plt.xlabel("Km")
+        plt.title("Network")
         plt.show()
 
     def free_space(self):
-        states = ['free'] * len(self.route_space['path'])
+        states = ["free"] * len(self.route_space["path"])
         for l in self.lines.values():
             l.free_state()
         for i in range(10):
@@ -147,7 +146,7 @@ class Network(object):
                        if ((key != label1) & (key != label2))]
 
         cross_lines = self.lines.keys()
-        inner_paths = {'0': label1}
+        inner_paths = {"0": label1}
         for i in range(len(cross_nodes) + 1):
             inner_paths[str(i + 1)] = []
             for inner_path in inner_paths[str(i)]:
@@ -221,24 +220,24 @@ class Network(object):
         return prop_s_i
 
     #  for each element of connections set the attribute latency or snr (latency by default)
-    def stream(self, connections, best='latency'):
+    def stream(self, connections, best="latency"):
         streamed_connections = []
         for connection in connections:
             in_node = connection.in_node
             out_node = connection.out_node
             sig_power = connection.signal_power
-            if best == 'latency':
+            if best == "latency":
                 path = self.find_best_latency(in_node, out_node)
-            elif best == 'snr':
+            elif best == "snr":
                 path = self.find_best_snr(in_node, out_node)
             else:
-                print('ERROR INPUT VALUE:', best)
+                print("ERROR INPUT VALUE:", best)
                 continue
             if path:
                 path_occupancy = self.route_space.loc[
                                      self.route_space.path == path].T.values[1:]
                 channel = [i for i in range(len(path_occupancy))
-                           if path_occupancy[i] == 'free'][0]
+                           if path_occupancy[i] == "free"][0]
                 lightpath = Lightpath(sig_power, path, channel)
                 rb = self.calculate_bit_rate(lightpath, self.nodes[in_node].transceiver)
                 if rb == 0:
@@ -248,8 +247,8 @@ class Network(object):
                 path_occupancy = self.route_space.loc[
                                      self.route_space.path == path].T.values[1:]
                 channel = [i for i in range(len(path_occupancy))
-                           if path_occupancy[i] == 'free'][0]
-                path = path.replace('-->', '')
+                           if path_occupancy[i] == "free"][0]
+                path = path.replace("-->", "")
                 in_lightpath = Lightpath(sig_power, path, channel)
                 out_lightpath = self.propagate(in_lightpath, True)
                 connection.latency = out_lightpath.latency
@@ -264,7 +263,7 @@ class Network(object):
 
     @staticmethod
     def path_to_line_set(path):
-        path = path.replace('-->', '')
+        path = path.replace("-->", "")
         return set([path[i] + path[i + 1] for i in range(len(path) - 1)])
 
     @staticmethod
@@ -290,7 +289,7 @@ class Network(object):
         for i in range(len(all_paths)):
             line_set = all_paths[i]
             if lines.intersection(line_set):
-                states[i] = 'occupied'
+                states[i] = "occupied"
 
                 path_to_update = self.line_set_to_path(line_set)
 
@@ -313,7 +312,7 @@ class Network(object):
         for path in all_paths:
             path_occupancy = self.route_space.loc[
                                  self.route_space.path == path].T.values[1:]
-            if 'free' in path_occupancy:
+            if "free" in path_occupancy:
                 available_path.append(path)
             return available_path
 
@@ -325,13 +324,13 @@ class Network(object):
         Rb = 0
         GSNR_db = pd.array(self.weighted_paths.loc[self.weighted_paths['path'] == path]['snr'])[0]
         GSNR = 10 ** (GSNR_db / 10)
-        if strategy == 'fixed_rate':
+        if strategy == "fixed_rate":
             if GSNR > 2 * math.erfcinv(2 * BER_t) ** 2 * (Rs / Bn):
                 Rb = 100
             else:
                 Rb = 0
 
-        if strategy == 'flex_rate':
+        if strategy == "flex_rate":
             if GSNR < 2 * math.erfcinv(2 * BER_t) ** 2 * (Rs / Bn):
                 Rb = 0
             elif (GSNR > 2 * math.erfcinv(2 * BER_t) ** 2 * (Rs / Bn)) & (GSNR < (14 / 3) * math.erfcinv(
@@ -343,7 +342,7 @@ class Network(object):
             elif GSNR > 10 * math.erfcinv((8 / 3) * BER_t) ** 2 * (Rs / Bn):
                 Rb = 400
 
-        if strategy == 'shannon':
+        if strategy == "shannon":
             Rb = 2 * Rs * np.log2(1 + Bn / Rs * GSNR) / 1e9
 
         return Rb
@@ -361,7 +360,7 @@ class Network(object):
         self.stream(list_con)
         btr = connection.bit_rate
         if btr == 0:
-            mtx[A][B] = float('inf')
-            return float('inf')
+            mtx[A][B] = float("inf")
+            return float("inf")
         mtx[A][B] -= btr
         return mtx[A][B]

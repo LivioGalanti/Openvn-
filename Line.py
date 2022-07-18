@@ -54,7 +54,6 @@ class Line(object):
 
     def noise_generation(self, lightpath):
         # noise = 0.000000001 * signal_power * self._length  # 1e-9 * s_p * length
-
         noise = self.ase_generation() + self.nli_generation(lightpath.signal_power, lightpath.df, lightpath.Rs)
 
         return noise
