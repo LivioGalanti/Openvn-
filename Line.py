@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.constants import c, h, pi
+from Node import Node
 
 
 class Line(object):

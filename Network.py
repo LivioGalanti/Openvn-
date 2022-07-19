@@ -7,11 +7,11 @@ import pandas as pd
 import scipy as sp
 import random
 from scipy import special as math
-import Signal_information
-import Node
-import Line
-import Lightpath
-import Connection
+from Signal_information import SignalInformation
+from Node import Node
+from Line import Line
+from Lightpath import Lightpath
+from Connection import Connection
 
 BER_t = 1e-3
 
@@ -86,7 +86,7 @@ class Network(object):
                 for node in path:
                     path_str += node + "-->"
                 paths.append(path_str[:-3])
-                s_i = Signal_information(s_power, path)
+                s_i = SignalInformation(s_power, path)
                 if couples in self.lines.keys():
                     line = self.lines[couples]
                     s_power = line.optimized_launch_power(line.eta_nli(s_i.df, s_i.Rs))

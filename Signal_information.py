@@ -1,4 +1,4 @@
-import Lightpath
+from Lightpath import Lightpath
 
 '''class Lightpath(object):
     def __init__(self, power, path, channel):

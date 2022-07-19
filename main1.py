@@ -1,6 +1,6 @@
 import itertools
 import numpy as np
-import Network
+from Network import Network
 import pandas as pd
 from random import shuffle, random
 import copy
