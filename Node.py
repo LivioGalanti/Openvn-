@@ -1,10 +1,3 @@
-import json
-import numpy as np
-import matplotlib.pyplot as plt
-from Signal_information import SignalInformation
-from Line import Line
-
-
 class Node(object):
     def __init__(self, node):
         self._label = node["label"]  # string
