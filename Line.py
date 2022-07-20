@@ -6,7 +6,7 @@ class Line(object):
     def __init__(self, line_dict):
         self._label = line_dict["label"]
         self._length = line_dict["length"]
-        self._successive = {}  # dict [Node]
+        self.successive = {}  # dict [Node]
         self._state = ["free"] * 10
         self._n_amplifiers = int(self._length / 80e3)  # one amp every 80km
         self._gain = 16
@@ -70,7 +70,7 @@ class Line(object):
             new_state = self._state.copy()
             new_state[channel] = "occupied"
             self._state = new_state
-        node = self._successive[lightpath.path[0]]
+        node = self.successive[lightpath.path[0]]
         lightpath = node.propagate(lightpath, occupation)
         return lightpath
 

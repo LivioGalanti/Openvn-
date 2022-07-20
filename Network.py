@@ -322,7 +322,7 @@ class Network(object):
         global Bn
         path = lightpath.path
         Rb = 0
-        GSNR_db = pd.array(self.weighted_paths.loc[self.weighted_paths['path'] == path]['snr'])[0]
+        GSNR_db = pd.array(self.weighted_paths.loc[self.weighted_paths["path"] == path]["snr"])[0]
         GSNR = 10 ** (GSNR_db / 10)
         if strategy == "fixed_rate":
             if GSNR > 2 * math.erfcinv(2 * BER_t) ** 2 * (Rs / Bn):
